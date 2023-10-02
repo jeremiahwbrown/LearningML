@@ -20,8 +20,8 @@ public class Neuron {
         this.activasion = 0.0d;
         this.grad = 0.0d;
     }
-    public static double relu(double x){return x>=0? x:x*.01;}
-    public static double relu_derivative(double x){return x>0? 1:.01;}
+    public static double relu(double x){return x>0? x:x*.1;}
+    public static double relu_derivative(double x){return x>0? 1:.1;}
     public static double sum(double[] array){
         double result = 0.0;
         for (int i=0; i<array.length; i++){
@@ -54,6 +54,7 @@ public class Neuron {
 
     public void back_propigate(double a, double loss){
         double temp;
+        double g = .9;
         Random rand = new Random();
         for (int i=0; i<this.weights.length; i++){
             this.weights[i] -= a*loss*this.grad*this.multipliers[i];

@@ -4,7 +4,7 @@ import java.util.Arrays;
 class Main{
 
     public static void main(String[] args){
-        int size = 16;
+        int size = 2;
         int depth = 2;
         int len = 100;
         double[][] X_train = new double[len][size];
@@ -25,7 +25,7 @@ class Main{
         }
 
 
-        NeuralNetwork NN = new NeuralNetwork(size, depth, X_train, y_real);
+        NeuralNetwork NN = new NeuralNetwork(size, depth, X_train, y_real, false);
         NN.fit();
         NN.printDifference();
         NN.printNet();
