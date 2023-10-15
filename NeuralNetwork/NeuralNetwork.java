@@ -12,23 +12,27 @@ class NeuralNetwork {
         private double activation;
         private double output;
         private double[] gradients;
+        private double[] previousGrad;
         private double neuronGradient;
 
-        Neuron(int size){
+        Neuron(int size, Random rand){
             this.size = size;
             this.weights = new double[size];
-            this.bias = 0.0;
             this.multipliers = new double[size];
             this.activation = 0.0;
             this.output = 0.0;
             this.gradients = new double[size];
-            this.neuronGradient = 0.0;
+            this.neuronGradient = 1.0;
+            this.previousGrad = new double[size];
 
-            Random rand = new Random();
+            double min = -Math.pow(2.0/size, .5);
+            double max = Math.pow(2.0/size, .5);
             for (int i=0; i<this.size; i++){
-                this.weights[i] = rand.nextDouble();
+                this.weights[i] = min + (max - min)*rand.nextDouble();
+                this.multipliers[i] = 1.0d;
+                this.gradients[i] = 1.0d;
             }
-            this.bias = rand.nextDouble();
+            this.bias = min + (max - min)*rand.nextDouble();
 
         }
 
@@ -57,26 +61,26 @@ class NeuralNetwork {
         double[][] W;
         double[] G;
         TempObject(Layer layer){
-            double[][] W = new double[layer.outputSize][layer.inputSize];
-            double[] G = new double[layer.outputSize];
+            double[][] weights = new double[layer.outputSize][layer.inputSize];
+            double[] gradients = new double[layer.outputSize];
             for (int i=0; i<layer.outputSize; i++){
                 for (int j=0; j<layer.inputSize; j++){
-                    W[i][j] = layer.layer[i].weights[j];
+                    weights[i][j] = layer.layer[i].weights[j];
                 }
-                G[i] = layer.layer[i].neuronGradient;
+                gradients[i] = layer.layer[i].neuronGradient;
             }
+            this.W = weights;
+            this.G = gradients;
         }
 
-        TempObject(int outputSize, int intputSize, double grad){
-            double[][] W = new double[outputSize][intputSize];
-            double[] G = new double[outputSize];
-            for (int i=0; i<outputSize; i++){
-                for (int j=0; j<intputSize; j++){
-                    W[i][j] = 1.0d;
-                }
-                G[i] = grad;
-            }
+        TempObject(){
+            this.W = null;
+            this.G = null;
+        }
 
+        TempObject(TempObject temp){
+            this.W = Arrays.copyOf(temp.W, temp.W.length);
+            this.G = Arrays.copyOf(temp.G, temp.G.length);
         }
 
     }
@@ -84,15 +88,15 @@ class NeuralNetwork {
     class Layer{
 
         Neuron[] layer;
-        private int inputSize;
-        private int outputSize;
+        private final int inputSize;
+        private final int outputSize;
 
-        Layer(int inputSize, int outputSize){
+        Layer(int inputSize, int outputSize, Random rand){
             this.inputSize = inputSize;
             this.outputSize = outputSize;
             this.layer = new Neuron[outputSize];
             for (int i=0; i<this.outputSize; i++){
-                this.layer[i] = new Neuron(this.inputSize);
+                this.layer[i] = new Neuron(this.inputSize, rand);
             }
         }
 
@@ -107,15 +111,23 @@ class NeuralNetwork {
             return activations;
         }
 
-        TempObject gradient(TempObject prevLayer){
-            double gradientSum = 0.0;
-            for (int i=0; i<this.outputSize; i++){
-                for (int j=0; j<this.inputSize; j++){
-                    gradientSum += CustomMath.relu_derivative(this.layer[i].output)*prevLayer.W[i][j]*prevLayer.G[i];
+        TempObject gradient(TempObject prevLayer, double loss, boolean isLastLayer){
+            if (isLastLayer){
+                for(int j=0; j<this.outputSize; j++){
+                    this.layer[j].neuronGradient = loss*CustomMath.relu_derivative(this.layer[j].output);
                 }
-                this.layer[i].neuronGradient += gradientSum;
-                gradientSum = 0.0;
+
+            } else {
+                double gradientSum = 0.0;
+                for (int j=0; j<this.outputSize; j++){
+                    for (int i=0; i<prevLayer.W.length; i++){
+                        gradientSum += prevLayer.W[j][i]*prevLayer.G[j];
+                    }
+                    this.layer[j].neuronGradient = gradientSum*CustomMath.relu_derivative(this.layer[j].output);
+                    gradientSum = 0.0;
+                }
             }
+
             for (int i=0; i<this.outputSize; i++){
                 for (int j=0; j<this.inputSize; j++){
                     this.layer[i].gradients[j] += this.layer[i].multipliers[j]*this.layer[i].neuronGradient;
@@ -128,39 +140,58 @@ class NeuralNetwork {
         void zeroGradient(){
             for (int i=0; i<this.outputSize; i++){
                 for (int j=0; j<this.inputSize; j++){
+                    this.layer[i].previousGrad[j] = this.layer[i].gradients[j];
                     this.layer[i].gradients[j] = 0.0d;
                 }
                 this.layer[i].neuronGradient = 0.0d;
             }
         }
 
-        void backPropigate(double a, double loss){
+        void backPropigate(double a, double adj, double g){
             for (int i=0; i<outputSize; i++){
                 for (int j=0; j<inputSize; j++){
-                    this.layer[i].weights[j] -= a*loss*this.layer[i].gradients[j];
+                    this.layer[i].weights[j] -= (a*adj*this.layer[i].gradients[j] + g*this.layer[i].previousGrad[j]);
                 }
+                this.layer[i].bias -=a*adj*this.layer[i].neuronGradient;
+            }
+        }
+
+        void print(){
+            for (int i=0; i<this.outputSize; i++){
+                System.out.println(Arrays.toString(this.layer[i].weights)+" "+this.layer[i].bias);
+                }
+                System.out.println();
+            }
+
+        void printGradients(){
+            for (int i=0; i<this.outputSize; i++){
+                System.out.println(Arrays.toString(this.layer[i].gradients));
+                System.out.println();
             }
         }
     }
 
+
     Layer[] Net;
     NeuralNetwork(int depth, int[][] size){
+        Random rand = new Random(371242371);
         this.Net = new Layer[depth];
         for(int i=0; i<size.length; i++){
-            this.Net[i] = new Layer(size[i][0], size[i][1]);
+            this.Net[i] = new Layer(size[i][0], size[i][1], rand);
         }
     }
 
     NeuralNetwork(int depth, int width){
+        Random rand = new Random(371242371);
         this.Net = new Layer[depth];
         for (int i=0; i<depth; i++){
-            this.Net[i] = new Layer(width, width);
+            this.Net[i] = new Layer(width, width, rand);
         }
     }
 
     double[] feedForward(double[] input){
-        double[] activations = Arrays.copyOf(input, input.length);
-        double[] temp = new double[1];
+        double[] activations = input;
+        double[] temp;
         for (int i=0; i<this.Net.length; i++){
             temp = this.Net[i].feedForward(activations);
             activations = temp;
@@ -168,12 +199,13 @@ class NeuralNetwork {
         return activations;
     }
 
-    void gradient(TempObject output){
+    void gradient(TempObject output, double loss, boolean isLast){
         TempObject result = output;
         TempObject temp;
-        for (int i=0; i<this.Net.length; i++){
-            temp = this.Net[i].gradient(result);
+        for (int i=this.Net.length-1; i>=0; i--){
+            temp = this.Net[i].gradient(result, loss, isLast);
             result = temp;
+            isLast = false;
         }
     }
 
@@ -183,9 +215,23 @@ class NeuralNetwork {
         }
     }
 
-    void backPropigate(double a, double loss){
+    void backPropigate(double a, double adj, double g){
         for (int i=0; i<this.Net.length; i++){
-            this.Net[i].backPropigate(a, loss);
+            this.Net[i].backPropigate(a, adj, g);
+        }
+    }
+
+    void printGradients(){
+        for (int i=0; i<this.Net.length; i++){
+            this.Net[i].printGradients();
+            System.out.println("\n");
+        }
+    }
+
+    void print(){
+        for (int i=0; i<this.Net.length; i++){
+            this.Net[i].print();
+            System.out.println("\n");
         }
     }
 }
