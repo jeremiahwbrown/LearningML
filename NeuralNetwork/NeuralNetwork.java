@@ -73,9 +73,9 @@ class NeuralNetwork {
             this.G = gradients;
         }
 
-        TempObject(){
+        TempObject(double[] grad){
             this.W = null;
-            this.G = null;
+            this.G = grad;
         }
 
         TempObject(TempObject temp){
@@ -111,10 +111,10 @@ class NeuralNetwork {
             return activations;
         }
 
-        TempObject gradient(TempObject prevLayer, double loss, boolean isLastLayer){
+        TempObject gradient(TempObject prevLayer, boolean isLastLayer){
             if (isLastLayer){
                 for(int j=0; j<this.outputSize; j++){
-                    this.layer[j].neuronGradient = loss*CustomMath.relu_derivative(this.layer[j].output);
+                    this.layer[j].neuronGradient = prevLayer.G[j]*CustomMath.relu_derivative(this.layer[j].output);
                 }
 
             } else {
@@ -199,11 +199,11 @@ class NeuralNetwork {
         return activations;
     }
 
-    void gradient(TempObject output, double loss, boolean isLast){
+    void gradient(TempObject output, boolean isLast){
         TempObject result = output;
         TempObject temp;
         for (int i=this.Net.length-1; i>=0; i--){
-            temp = this.Net[i].gradient(result, loss, isLast);
+            temp = this.Net[i].gradient(result, isLast);
             result = temp;
             isLast = false;
         }
