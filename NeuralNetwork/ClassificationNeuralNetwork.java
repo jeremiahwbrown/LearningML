@@ -19,7 +19,7 @@ public class ClassificationNeuralNetwork {
             for (int i=0; i<prevActivations.length; i++){
                 sum+=Math.exp(prevActivations[i]);
             }
-            for (int i=0; i<this.size; i++){
+            for (int i=0; i<this.expActivations.length; i++){
                 this.expActivations[i] = Math.exp(prevActivations[i])/sum;
             }
         }
@@ -70,7 +70,7 @@ public class ClassificationNeuralNetwork {
 
     public double[] feedForward(double[] input){
         double[] out = this.network.feedForward(input);
-        this.lastLayer.calculateSoftmax(input);
+        this.lastLayer.calculateSoftmax(out);
         return this.lastLayer.expActivations;
     }
 
@@ -130,10 +130,10 @@ public class ClassificationNeuralNetwork {
         double initialCost = 0.0;
         double cost = 0.0;
         int increment = 0;
-        int inc = 120;
+        int inc = 150;
         int startIndex = 0;
         int finishIndex = startIndex + inc;
-        int max_iterations = 60 * (this.x_data.length/inc + 1);
+        int max_iterations = 120 * (this.x_data.length/inc + 1);
 
         whole:
         for (int i = 0; i < 3; i++) {
@@ -160,12 +160,12 @@ public class ClassificationNeuralNetwork {
                 }
             }
             System.out.println("Increments=" + increment + " cost=" + cost + " a=" + a +
-                " change="+ (initialCost-cost)+"\n");
-            if (initialCost - cost < 0){
+                " change="+ (cost - initialCost)+"\n");
+            if (cost - initialCost > 0){
                 a /= 10;
             }
         }
-        System.out.println("Finished: cost=" + cost + " a=" + a+" change="+ (initialCost-cost));
+        System.out.println("Finished: cost=" + cost + " a=" + a+" change="+ (cost - initialCost));
     }
 
     public void print(){

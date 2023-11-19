@@ -1,5 +1,3 @@
-import java.io.IOException;
-
 public class Main {
 
 //    public static void main(String[] args){
@@ -76,99 +74,116 @@ public class Main {
 //
 
 
-    //Classification
-private static void printMnistMatrix(final MnistMatrix matrix) {
-    System.out.println("label: " + matrix.getLabel());
-    for (int r = 0; r < matrix.getNumberOfRows(); r++ ) {
-        for (int c = 0; c < matrix.getNumberOfColumns(); c++) {
-            System.out.print(matrix.getValue(r, c) + " ");
-        }
-        System.out.println();
-    }
-}
-
-    public static int[] compressArray(int[][] multiDimArray) {
-        int totalElements = 0;
-        for (int i = 0; i < multiDimArray.length; i++) {
-            totalElements += multiDimArray[i].length;
-        }
-
-        int[] oneDimArray = new int[totalElements];
-        int index = 0;
-
-        for (int i = 0; i < multiDimArray.length; i++) {
-            for (int j = 0; j < multiDimArray[i].length; j++) {
-                oneDimArray[index] = multiDimArray[i][j];
-                index++;
-            }
-        }
-
-        return oneDimArray;
-    }
-
-    public static double[] intArrayToDoubleArray(int[] intArray) {
-        double[] doubleArray = new double[intArray.length];
-
-        for (int i = 0; i < intArray.length; i++) {
-            doubleArray[i] = (double) intArray[i]; // Type cast int to double
-        }
-
-        return doubleArray;
-    }
-
-    public static double[][] intArrayToDoubleArray(int[][] intArray) {
-        double[][] doubleArray = new double[intArray.length][intArray[0].length];
-
-        for (int i = 0; i < intArray.length; i++) {
-            for (int j=0; j<intArray[i].length; j++){
-                doubleArray[i][j] = (double) intArray[i][j];
-            }
-        }
-
-        return doubleArray;
-    }
-    public static void main(String[] args) throws IOException {
-        MnistMatrix[] mnistMatrix = new MnistDataReader().readData("data/train-images.idx3-ubyte", "data/train-labels.idx1-ubyte");
-        mnistMatrix = new MnistDataReader().readData("data/t10k-images.idx3-ubyte", "data/t10k-labels.idx1-ubyte");
-
-        int[][] x_data = new int[10000][784];
-        int[][] y_data = new int[10000][10];
-        for (int i=0; i<mnistMatrix.length; i++){
-            for (int j=0; j<mnistMatrix[i].getData().length; j++){
-                x_data[i] = compressArray(mnistMatrix[i].getData());
-                y_data[i][mnistMatrix[i].getLabel()] = 1;
-            }
-        }
-
-
-        double[][] X_train = intArrayToDoubleArray(x_data);
-        double[][] y_train = intArrayToDoubleArray(y_data);
-        int[][] size ={
-            {x_data[0].length, 10},
-            {10, 10},
-        };
-        int depth = 2;
-        ClassificationNeuralNetwork NN = new ClassificationNeuralNetwork(depth, size, X_train, y_train);
-        //NN.print();
-        for (int i=0; i<10; i++){
-            System.out.println("Predicted: "+ predictedValue(NN.feedForward(X_train[i]))
-            +" Real: "+ predictedValue(y_train[i]));
-        }
-        NN.fit(1e-2);
+//    //Classification
+//private static void printMnistMatrix(final MnistMatrix matrix) {
+//    System.out.println("label: " + matrix.getLabel());
+//    for (int r = 0; r < matrix.getNumberOfRows(); r++ ) {
+//        for (int c = 0; c < matrix.getNumberOfColumns(); c++) {
+//            System.out.print(matrix.getValue(r, c) + " ");
+//        }
 //        System.out.println();
-//        NN.print();
+//    }
+//}
+
+//    public static int[] compressArray(int[][] multiDimArray) {
+//        int totalElements = 0;
+//        for (int i = 0; i < multiDimArray.length; i++) {
+//            totalElements += multiDimArray[i].length;
+//        }
+//
+//        int[] oneDimArray = new int[totalElements];
+//        int index = 0;
+//
+//        for (int i = 0; i < multiDimArray.length; i++) {
+//            for (int j = 0; j < multiDimArray[i].length; j++) {
+//                oneDimArray[index] = multiDimArray[i][j];
+//                index++;
+//            }
+//        }
+//
+//        return oneDimArray;
+//    }
+
+//    public static double[] intArrayToDoubleArray(int[] intArray) {
+//        double[] doubleArray = new double[intArray.length];
+//
+//        for (int i = 0; i < intArray.length; i++) {
+//            doubleArray[i] = (double) intArray[i]; // Type cast int to double
+//        }
+//
+//        return doubleArray;
+//    }
+
+//    public static double[][] intArrayToDoubleArray(int[][] intArray) {
+//        double[][] doubleArray = new double[intArray.length][intArray[0].length];
+//
+//        for (int i = 0; i < intArray.length; i++) {
+//            for (int j=0; j<intArray[i].length; j++){
+//                doubleArray[i][j] = (double) intArray[i][j];
+//            }
+//        }
+//
+//        return doubleArray;
+//    }
+//    public static void main(String[] args) throws IOException {
+//        MnistMatrix[] mnistMatrix = new MnistDataReader().readData("data/train-images.idx3-ubyte", "data/train-labels.idx1-ubyte");
+//        mnistMatrix = new MnistDataReader().readData("data/t10k-images.idx3-ubyte", "data/t10k-labels.idx1-ubyte");
+//
+//        int[][] x_data = new int[10000][784];
+//        int[][] y_data = new int[10000][10];
+//        for (int i=0; i<mnistMatrix.length; i++){
+//            for (int j=0; j<mnistMatrix[i].getData().length; j++){
+//                x_data[i] = compressArray(mnistMatrix[i].getData());
+//                y_data[i][mnistMatrix[i].getLabel()] = 1;
+//            }
+//        }
+//
+//
+//        double[][] X_train = intArrayToDoubleArray(x_data);
+//        double[][] y_train = intArrayToDoubleArray(y_data);
+//        int[][] size ={
+//            {x_data[0].length, 10},
+//            {10, 10},
+//        };
+//        int depth = 2;
+//        ClassificationNeuralNetwork NN = new ClassificationNeuralNetwork(depth, size, X_train, y_train);
+//        //NN.print();
+//        int correct = 0;
+//        for (int i = 0; i < X_train.length; i++) {
+//            int predVal = predictedValue(NN.feedForward(X_train[i]));
+//            int realVal = predictedValue(y_train[i]);
+//            if (predVal == realVal) {
+//                correct += 1;
+//            }
+//          //  System.out.println("Predicted: " + predVal + " Real: " + realVal);
+//        }
+//        double ratio = (double)correct/ (double)X_train.length;;
+//        System.out.println("Ratio: " + ratio);
 //        System.out.println();
-//        NN.printGradients();
-
-        System.out.println("After training:");
-        for (int i=0; i<10; i++){
-            System.out.println("Predicted: "+ predictedValue(NN.feedForward(X_train[i]))
-                +" Real: "+ predictedValue(y_train[i]));
-        }
-
-        //System.out.println(Arrays.toString(size[0])+" "+Arrays.toString(size[1]));
-
-    }
+//
+//        NN.fit(1e-6);
+////        System.out.println();
+////        NN.print();
+////        System.out.println();
+////        NN.printGradients();
+//
+//        System.out.println("After training:");
+//        correct = 0;
+//        for (int i = 0; i < X_train.length; i++) {
+//            int predVal = predictedValue(NN.feedForward(X_train[i]));
+//            int realVal = predictedValue(y_train[i]);
+//            if (predVal == realVal) {
+//                correct += 1;
+//            }
+//            //  System.out.println("Predicted: " + predVal + " Real: " + realVal);
+//        }
+//        ratio = (double)correct/ (double)X_train.length;;
+//        System.out.println("Ratio: " + ratio);
+//        System.out.println();
+//
+//        //System.out.println(Arrays.toString(size[0])+" "+Arrays.toString(size[1]));
+//
+//    }
 
     public static int predictedValue(double[] predictions){
         int val = 11;
@@ -181,5 +196,60 @@ private static void printMnistMatrix(final MnistMatrix matrix) {
         }
         return val;
     }
-}
 
+    public static void main(String[] args) {
+
+        double[][] x_data = new double[150][3];
+        double[][] y_data = new double[150][3];
+
+        for (int i = 0; i < x_data.length; i++) {
+            if (i < x_data.length/3) {
+                x_data[i][0] = 0;
+                x_data[i][1] = 0;
+                y_data[i][0] = 1;
+            } else if (i < 2*(x_data.length/3)) {
+                x_data[i][0] = 0;
+                x_data[i][1] = 1;
+                y_data[i][1] = 1;
+            } else {
+                x_data[i][0] = 1;
+                x_data[i][1] = 1;
+                y_data[i][2] = 1;
+            }
+        }
+
+        ClassificationNeuralNetwork CNN = new ClassificationNeuralNetwork(2, 3, x_data, y_data);
+
+        int correct = 0;
+        for (int i = 0; i < x_data.length; i++) {
+            int predVal = predictedValue(CNN.feedForward(x_data[i]));
+            int realVal = predictedValue(y_data[i]);
+            if (predVal == realVal) {
+                correct += 1;
+            }
+          //  System.out.println("Predicted: " + predVal + " Real: " + realVal);
+        }
+        double ratio = (double)correct/ (double)x_data.length;;
+        System.out.println("Ratio: " + ratio);
+        System.out.println();
+
+        //CNN.print();
+        CNN.fit(1e-2);
+        //CNN.print();
+
+        System.out.println("After training:");
+
+        correct = 0;
+        for (int i = 0; i < x_data.length; i++) {
+            int predVal = predictedValue(CNN.feedForward(x_data[i]));
+            int realVal = predictedValue(y_data[i]);
+            if (predVal == realVal) {
+                correct++;
+            }
+           // System.out.println("Predicted: " + predVal + " Real: " + realVal);
+        }
+        ratio = (double)correct/ (double)x_data.length;
+        System.out.println("Ratio: " + ratio);
+        System.out.println();
+    }
+}

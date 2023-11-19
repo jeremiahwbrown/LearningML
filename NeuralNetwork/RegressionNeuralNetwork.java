@@ -59,7 +59,7 @@ public class RegressionNeuralNetwork {
     }
 
     public void backPropigate(double a) {
-        this.network.backPropigate(a, 1, (this.g / this.x_data.length));
+        this.network.backPropigate(a, 1.0, (this.g / this.x_data.length));
         //this.network.backPropigate(a, (this.g/this.x_data.length), (this.g/this.x_data.length));
     }
 

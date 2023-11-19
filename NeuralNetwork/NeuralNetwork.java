@@ -75,7 +75,7 @@ class NeuralNetwork {
 
         TempObject(double[] grad){
             this.W = null;
-            this.G = grad;
+            this.G = Arrays.copyOf(grad, grad.length);
         }
 
         TempObject(TempObject temp){
