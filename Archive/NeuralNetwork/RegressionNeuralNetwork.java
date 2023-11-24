@@ -73,7 +73,7 @@ public class RegressionNeuralNetwork {
 //            System.out.println("Loss: "+loss);
 //            System.out.println("Math.pow: "+Math.pow(loss, 2.0));
 //            System.out.println("Cost: "+cost);
-            cost += Math.pow(loss, 2.0);
+            cost += Math.pow(loss, 3.0);
         }
         this.backPropigate(a);
         System.out.println(start+" "+finish);
@@ -109,10 +109,10 @@ public class RegressionNeuralNetwork {
         double cost = 0.0;
         int increment = 0;
         double initialCost = this.cost();
-        int inc = 120;
+        int inc = 32;
         int startIndex = 0;
         int finishIndex = startIndex + inc;
-        int max_iterations = 60 * (this.x_data.length/inc + 1);
+        int max_iterations = 100;//60 * (this.x_data.length/inc + 1);
         System.out.println("Initial cost=" + cost);
 
         whole:
